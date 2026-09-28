@@ -1,0 +1,76 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>{{ report_title }} — {{ billing_type_label }}</title>
+  <style>
+  @page { size: A4 landscape; margin: 1.2cm; }
+  body { font-family: Arial, sans-serif; font-size: 12px; color: #222; margin: 0; padding: 0; }
+  h1 { font-size: 16px; margin: 0 0 6px; text-align: center; text-transform: uppercase; }
+  .meta { text-align: center; color: #444; margin: 0 0 14px; font-size: 11px; }
+  .billing-type { text-align: center; font-weight: bold; margin: 0 0 12px; font-size: 12px; }
+  table { width: 100%; border-collapse: collapse; table-layout: fixed; }
+  th, td { border: 1px solid #333; padding: 5px 6px; text-align: left; overflow-wrap: anywhere; }
+  th { background: #f1f5f9; font-size: 10px; text-transform: uppercase; }
+  td.amount, th.amount { text-align: right; }
+  col.slno { width: 5%; }
+  col.date { width: 9%; }
+  col.bill-no { width: 9%; }
+  col.payment { width: 10%; }
+  col.patient { width: 22%; }
+  col.service { width: 30%; }
+  col.amount { width: 10%; }
+  .total-row td { font-weight: bold; }
+  .empty { color: #64748b; font-style: italic; text-align: center; margin: 24px 0; }
+  </style>
+</head>
+<body>
+  {% include "_hospital_header.html" %}
+  <h1>{{ report_title }} {{ period_label }}</h1>
+  <p class="billing-type">Billing Type: {{ billing_type_label }}</p>
+
+  {% if not has_rows %}
+  <p class="empty">No bills found for the selected billing type and date range.</p>
+  {% else %}
+  <table width="100%" border="1" cellspacing="0" cellpadding="0">
+    <colgroup>
+      <col class="slno">
+      <col class="date">
+      <col class="bill-no">
+      <col class="payment">
+      <col class="patient">
+      <col class="service">
+      <col class="amount">
+    </colgroup>
+    <thead>
+      <tr>
+        <th>SLNO</th>
+        <th>Date</th>
+        <th>Bill No.</th>
+        <th>Payment Mode</th>
+        <th>Patient Name</th>
+        <th>Service Name</th>
+        <th class="amount">Total Amount</th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for row in rows %}
+      <tr>
+        <td>{{ row.serial_no }}</td>
+        <td>{{ row.bill_date }}</td>
+        <td>{{ row.bill_no }}</td>
+        <td>{{ row.payment_mode }}</td>
+        <td>{{ row.patient_name }}</td>
+        <td>{{ row.service_name }}</td>
+        <td class="amount">{{ row.total_amount }}</td>
+      </tr>
+      {% endfor %}
+      <tr class="total-row">
+        <td colspan="6" style="text-align:right;">Total....</td>
+        <td class="amount">{{ grand_total }}</td>
+      </tr>
+    </tbody>
+  </table>
+  {% endif %}
+</body>
+</html>

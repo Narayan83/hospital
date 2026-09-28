@@ -1,0 +1,5 @@
+HMS Desktop log folder(s):
+D:\fullstack\others\hospital\desktop\logs
+C:\Users\tss\AppData\Local\HospitalManagement\logs
+
+Open: D:\fullstack\others\hospital\desktop\logs\desktop.log

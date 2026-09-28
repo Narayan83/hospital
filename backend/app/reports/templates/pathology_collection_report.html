@@ -1,0 +1,185 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>{{ report_title }}</title>
+  <style>
+  @page { size: A4 landscape; margin: 1.2cm; }
+  body { font-family: Arial, sans-serif; font-size: 11px; color: #222; margin: 0; padding: 0; }
+  h1 { font-size: 17px; margin: 0 0 4px; }
+  h2 { font-size: 14px; margin: 16px 0 8px; color: #1e40af; border-bottom: 1px solid #cbd5e1; padding-bottom: 4px; }
+  h3 { font-size: 12px; margin: 12px 0 6px; color: #334155; }
+  .meta { color: #555; margin: 2px 0 14px; font-size: 11px; }
+  table { width: 100%; border-collapse: collapse; margin-bottom: 8px; table-layout: fixed; }
+  th, td { border: 1px solid #cbd5e1; padding: 5px 7px; text-align: left; overflow-wrap: anywhere; }
+  th { background: #f1f5f9; }
+  td.num, th.num { text-align: right; }
+  td.total, th.total { text-align: right; font-weight: bold; }
+  .subtotal, .grand-total, .overall-total {
+    text-align: right;
+    font-weight: bold;
+    margin: 4px 0 8px;
+  }
+  .overall-total {
+    margin-top: 16px;
+    font-size: 13px;
+    border-top: 2px solid #334155;
+    padding-top: 8px;
+  }
+  .empty { color: #64748b; font-style: italic; margin: 12px 0; }
+  .doctor-block { margin-bottom: 18px; }
+  .doctor-block.doctor-page-break {
+    page-break-before: always;
+  }
+  </style>
+</head>
+<body>
+  {% include "_hospital_header.html" %}
+  <h1>{{ report_title }}</h1>
+  <p class="meta"><strong>Period:</strong> {{ period_label }}</p>
+
+  {% if report_type == "column_wise" %}
+    {% if not has_service_columns %}
+    <p class="empty">No patient services are marked for collection columns. Enable “Doctor Collection Column” on Patient Service Master.</p>
+    {% elif not has_rows %}
+    <p class="empty">No pathology collections found for the selected filters.</p>
+    {% else %}
+      {% for group in groups %}
+      <div class="doctor-block{% if not loop.first %} doctor-page-break{% endif %}">
+        {% if not loop.first %}
+        {% include "_hospital_header.html" %}
+        <h1>{{ report_title }}</h1>
+        <p class="meta"><strong>Period:</strong> {{ period_label }}</p>
+        {% endif %}
+        <h2>{{ group_label }}: {{ group.group_name }}</h2>
+        <table>
+          <thead>
+            <tr>
+              <th>Date</th>
+              <th>Bill No</th>
+              <th>Name</th>
+              <th>Payment Mode</th>
+              {% for col in service_columns %}
+              <th class="num">{{ col.service_name }}</th>
+              {% endfor %}
+              <th class="total">Total</th>
+            </tr>
+          </thead>
+          <tbody>
+            {% for row in group.rows %}
+            <tr>
+              <td>{{ row.bill_date }}</td>
+              <td>{{ row.bill_no }}</td>
+              <td>{{ row.patient_name }}</td>
+              <td>{{ row.payment_mode }}</td>
+              {% for col in service_columns %}
+              <td class="num">{{ row.amounts.get(col.service_id, "") }}</td>
+              {% endfor %}
+              <td class="total">{{ row.total_amount }}</td>
+            </tr>
+            {% endfor %}
+            <tr>
+              <td colspan="4"><strong>{{ group_label }} Total</strong></td>
+              {% for col in service_columns %}
+              <td class="num"><strong>{{ group.column_totals.get(col.service_id, "0.00") }}</strong></td>
+              {% endfor %}
+              <td class="total">{{ group.grand_total_amount }}</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+      {% endfor %}
+      <div class="overall-total">
+        Overall Total: {{ overall_total_amount }}
+      </div>
+    {% endif %}
+  {% else %}
+    {% if not has_rows %}
+    <p class="empty">No pathology collections found for the selected filters.</p>
+    {% else %}
+      {% for group in groups %}
+      <div class="doctor-block{% if not loop.first %} doctor-page-break{% endif %}">
+        {% if not loop.first %}
+        {% include "_hospital_header.html" %}
+        <h1>{{ report_title }}</h1>
+        <p class="meta"><strong>Period:</strong> {{ period_label }}</p>
+        {% endif %}
+        <h2>{{ group_label }}: {{ group.group_name }}</h2>
+        {% for date_group in group.date_groups %}
+        <h3>Date: {{ date_group.bill_date }}</h3>
+        <table>
+          <thead>
+            <tr>
+              <th>Bill No</th>
+              <th>Patient Id</th>
+              <th>Patient Name</th>
+              {% if is_referral %}
+              <th>Pathologist</th>
+              {% else %}
+              <th>Referring Doctor</th>
+              {% endif %}
+              <th>Payment Mode</th>
+              {% if not is_referral %}
+              <th>Service</th>
+              <th class="num">Rate</th>
+              {% endif %}
+              <th class="total">{% if is_referral %}Bill Amount{% else %}Amount{% endif %}</th>
+            </tr>
+          </thead>
+          <tbody>
+            {% for row in date_group.rows %}
+            <tr>
+              <td>{{ row.bill_no }}</td>
+              <td>{{ row.patient_no }}</td>
+              <td>{{ row.patient_name }}</td>
+              {% if is_referral %}
+              <td>{{ row.pathologist_name }}</td>
+              {% else %}
+              <td>{{ row.referring_doctor }}</td>
+              {% endif %}
+              <td>{{ row.payment_mode }}</td>
+              {% if not is_referral %}
+              <td>{{ row.service_name }}</td>
+              <td class="num">{{ row.rate }}</td>
+              {% endif %}
+              <td class="total">{{ row.amount }}</td>
+            </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+        <div class="subtotal">
+          Date Total: {{ date_group.total_amount }}
+        </div>
+        {% endfor %}
+        <div class="grand-total">
+          {{ group_label }} Grand Total: {{ group.grand_total_amount }}
+        </div>
+
+        {% if not is_referral %}
+        <h3>Service Summary ({{ period_label }})</h3>
+        <table>
+          <thead>
+            <tr>
+              <th>Service</th>
+              <th class="total">Total</th>
+            </tr>
+          </thead>
+          <tbody>
+            {% for row in group.service_summary %}
+            <tr>
+              <td>{{ row.service_name }}</td>
+              <td class="total">{{ row.total_amount }}</td>
+            </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+        {% endif %}
+      </div>
+      {% endfor %}
+      <div class="overall-total">
+        Overall Total: {{ overall_total_amount }}
+      </div>
+    {% endif %}
+  {% endif %}
+</body>
+</html>

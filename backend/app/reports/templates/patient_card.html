@@ -1,0 +1,141 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Patient Card - {{ patient_no }}</title>
+  <style>
+    @page { size: A4; margin: 1.5cm; }
+    body {
+      font-family: Arial, Helvetica, sans-serif;
+      font-size: 11pt;
+      color: #111827;
+      margin: 0;
+      padding: 0;
+    }
+    .page {
+      display: flex;
+      justify-content: center;
+      align-items: flex-start;
+      padding-top: 24pt;
+    }
+    .card {
+      width: 340pt;
+      border: 2pt solid #1d4ed8;
+      border-radius: 10pt;
+      overflow: hidden;
+      box-shadow: 0 2pt 8pt rgba(15, 23, 42, 0.12);
+    }
+    .card-header {
+      background: linear-gradient(135deg, #1d4ed8 0%, #2563eb 100%);
+      color: #fff;
+      text-align: center;
+      padding: 14pt 12pt 10pt;
+    }
+    .card-header .hospital-name {
+      font-size: 14pt;
+      font-weight: bold;
+      margin: 0;
+      line-height: 1.2;
+    }
+    .card-header .card-title {
+      font-size: 9pt;
+      margin: 4pt 0 0;
+      letter-spacing: 0.6pt;
+      text-transform: uppercase;
+      opacity: 0.92;
+    }
+    .card-body {
+      padding: 14pt 16pt 12pt;
+      background: #fff;
+    }
+    .patient-no {
+      text-align: center;
+      font-size: 22pt;
+      font-weight: bold;
+      color: #1d4ed8;
+      letter-spacing: 1pt;
+      margin: 0 0 10pt;
+    }
+    .field-table {
+      width: 100%;
+      border-collapse: collapse;
+    }
+    .field-table td {
+      padding: 4pt 0;
+      vertical-align: top;
+      font-size: 10pt;
+    }
+    .field-label {
+      width: 34%;
+      font-weight: bold;
+      color: #475569;
+      padding-right: 8pt;
+    }
+    .field-value {
+      color: #111827;
+    }
+    .card-footer {
+      border-top: 1pt solid #e2e8f0;
+      padding: 8pt 16pt 10pt;
+      font-size: 8pt;
+      color: #64748b;
+      text-align: center;
+      background: #f8fafc;
+    }
+  </style>
+</head>
+<body>
+  <div class="page">
+    <div class="card">
+      <div class="card-header">
+        <p class="hospital-name">{{ hospital_name }}</p>
+        <p class="card-title">Patient Identification Card</p>
+      </div>
+      <div class="card-body">
+        <p class="patient-no">{{ patient_no }}</p>
+        <table class="field-table">
+          <tr>
+            <td class="field-label">Name</td>
+            <td class="field-value">{{ patient_name }}</td>
+          </tr>
+          <tr>
+            <td class="field-label">Age / Sex</td>
+            <td class="field-value">{{ age }} / {{ gender_label }}</td>
+          </tr>
+          <tr>
+            <td class="field-label">Date of Birth</td>
+            <td class="field-value">{{ date_of_birth }}</td>
+          </tr>
+          <tr>
+            <td class="field-label">Blood Group</td>
+            <td class="field-value">{{ blood_group }}</td>
+          </tr>
+          <tr>
+            <td class="field-label">Mobile</td>
+            <td class="field-value">{{ mobile }}</td>
+          </tr>
+          <tr>
+            <td class="field-label">Address</td>
+            <td class="field-value">{{ address }}</td>
+          </tr>
+          <tr>
+            <td class="field-label">Section</td>
+            <td class="field-value">{{ hospital_section }}</td>
+          </tr>
+          <tr>
+            <td class="field-label">Patient Type</td>
+            <td class="field-value">{{ patient_type }}</td>
+          </tr>
+          <tr>
+            <td class="field-label">Registered</td>
+            <td class="field-value">{{ registered_on }}</td>
+          </tr>
+        </table>
+      </div>
+      <div class="card-footer">
+        Please carry this card for all hospital visits.
+      </div>
+    </div>
+  </div>
+</body>
+</html>

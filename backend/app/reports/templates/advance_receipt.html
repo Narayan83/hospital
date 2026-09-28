@@ -1,0 +1,107 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Advance Receipt - {{ voucher_no }}</title>
+  <style type="text/css">
+    body {
+      font-family: Arial, Helvetica, sans-serif;
+      font-size: 11pt;
+      color: #000000;
+      margin: 0;
+      padding: 0;
+    }
+    p { margin: 0; padding: 0; color: #000000; }
+    table { border-collapse: collapse; width: 100%; }
+    .header-sub {
+      font-size: 13pt;
+      font-weight: bold;
+      color: #000000;
+      text-align: center;
+      text-decoration: underline;
+      margin-top: 6px;
+      margin-bottom: 14px;
+    }
+    .meta {
+      font-size: 11pt;
+      color: #000000;
+      padding: 2px 0;
+    }
+    .meta strong {
+      font-weight: bold;
+    }
+    .detail-label {
+      font-size: 11pt;
+      font-weight: bold;
+      padding: 4px 0;
+      vertical-align: top;
+    }
+    .detail-value {
+      font-size: 11pt;
+      font-weight: normal;
+      padding: 4px 0;
+      text-align: right;
+      vertical-align: top;
+    }
+    .amount {
+      font-size: 13pt;
+      font-weight: bold;
+    }
+    .section {
+      margin-top: 18px;
+    }
+    .note {
+      font-size: 9pt;
+      font-weight: normal;
+      margin-top: 18px;
+      color: #333333;
+    }
+  </style>
+</head>
+<body>
+  <table border="0" cellspacing="0" cellpadding="0">
+    <tr>
+      <td align="center">
+        {% include "_hospital_header.html" %}
+        <p class="header-sub">{{ bill_title }}</p>
+      </td>
+    </tr>
+  </table>
+
+  <table border="0" cellspacing="0" cellpadding="2">
+    <tr>
+      <td width="55%" class="meta" align="left"><strong>Patient ID:</strong> {{ patient_no }}</td>
+      <td width="45%" class="meta" align="right"><strong>Date:</strong> {{ voucher_date }}</td>
+    </tr>
+    <tr>
+      <td width="55%" class="meta" align="left"><strong>Patient Name:</strong> {{ patient_name }}</td>
+      <td width="45%" class="meta" align="right"><strong>Receipt No:</strong> {{ voucher_no }}</td>
+    </tr>
+  </table>
+
+  <div class="section">
+    <table border="0" cellspacing="0" cellpadding="2">
+      <tr>
+        <td class="detail-label" width="42%">Advance Amount</td>
+        <td class="detail-value amount">{{ amount }}</td>
+      </tr>
+      <tr>
+        <td class="detail-label">Payment Mode</td>
+        <td class="detail-value">{{ payment_mode }}</td>
+      </tr>
+      {% if narration %}
+      <tr>
+        <td class="detail-label">Narration</td>
+        <td class="detail-value">{{ narration }}</td>
+      </tr>
+      {% endif %}
+      <tr>
+        <td class="detail-label">Advance Balance (after)</td>
+        <td class="detail-value">{{ balance_after }}</td>
+      </tr>
+    </table>
+  </div>
+
+  <p class="note">This is a computer generated advance / security deposit receipt.</p>
+</body>
+</html>

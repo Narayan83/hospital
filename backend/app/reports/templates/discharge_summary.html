@@ -1,0 +1,274 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>{{ report_title }} - {{ summary_no }}</title>
+  <style>
+    body {
+      font-family: Arial, Helvetica, sans-serif;
+      font-size: 10pt;
+      color: #111827;
+      margin: 0;
+      padding: 0;
+      width: 100%;
+    }
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      table-layout: fixed;
+    }
+    .header-title {
+      font-size: 16pt;
+      font-weight: bold;
+      color: #1e3a8a;
+      text-align: center;
+      margin: 0;
+      padding: 0;
+    }
+    .header-sub {
+      font-size: 12pt;
+      font-weight: bold;
+      color: #1e3a8a;
+      text-align: center;
+      margin: 6pt 0 0;
+      padding: 0;
+      letter-spacing: 0.4pt;
+    }
+    .header-meta {
+      font-size: 9pt;
+      font-weight: normal;
+      color: #64748b;
+      text-align: center;
+      margin: 2pt 0 0;
+      padding: 0;
+    }
+    .meta-label {
+      font-weight: bold;
+      color: #1e3a8a;
+      background: #eff6ff;
+      white-space: nowrap;
+    }
+    .meta-value {
+      color: #111827;
+    }
+    .grid-cell {
+      border: 1px solid #94a3b8;
+      padding: 5pt 6pt;
+      font-size: 9.5pt;
+      vertical-align: top;
+    }
+    .section-title {
+      font-size: 9.5pt;
+      font-weight: bold;
+      color: #1e40af;
+      text-transform: uppercase;
+      letter-spacing: 0.3pt;
+      padding: 10pt 0 4pt;
+      border-bottom: 1px solid #93c5fd;
+    }
+    .section-body {
+      font-size: 10pt;
+      color: #334155;
+      padding: 4pt 0 2pt;
+      line-height: 1.4;
+      white-space: pre-wrap;
+    }
+    .results-head {
+      background: #eff6ff;
+      font-weight: bold;
+      color: #1e3a8a;
+      font-size: 9pt;
+      border: 1px solid #94a3b8;
+      padding: 4pt 6pt;
+    }
+    .results-cell {
+      border: 1px solid #cbd5e1;
+      padding: 4pt 6pt;
+      font-size: 9.5pt;
+      vertical-align: top;
+    }
+    .sign-line {
+      border-top: 1px solid #64748b;
+      padding-top: 28pt;
+      text-align: center;
+      font-size: 9pt;
+      color: #334155;
+    }
+    .footer-note {
+      font-size: 8pt;
+      color: #64748b;
+      padding-top: 8pt;
+      text-align: center;
+    }
+  </style>
+</head>
+<body>
+  <!-- Qt QTextDocument renders width="100%" tables reliably for full-page layout -->
+  <table width="100%" border="0" cellspacing="0" cellpadding="0">
+    <tr>
+      <td width="100%" style="width:100%; text-align:center; border-bottom: 2px solid #1e40af; padding-bottom: 8pt;">
+        {% include "_hospital_header.html" %}
+        <p class="header-sub">{{ report_title }}</p>
+      </td>
+    </tr>
+  </table>
+
+  <table width="100%" border="1" cellspacing="0" cellpadding="0" style="border-color: #cbd5e1; margin-top: 10pt;">
+    <tr>
+      <td width="16%" class="grid-cell meta-label">Summary No</td>
+      <td width="34%" class="grid-cell meta-value">{{ summary_no }}</td>
+      <td width="16%" class="grid-cell meta-label">Summary Date</td>
+      <td width="34%" class="grid-cell meta-value">{{ summary_date }}</td>
+    </tr>
+    <tr>
+      <td class="grid-cell meta-label">Patient ID</td>
+      <td class="grid-cell meta-value">{{ patient_no }}</td>
+      <td class="grid-cell meta-label">Patient Name</td>
+      <td class="grid-cell meta-value">{{ patient_name }}</td>
+    </tr>
+    <tr>
+      <td class="grid-cell meta-label">Age / Sex</td>
+      <td class="grid-cell meta-value">{{ patient_age }} / {{ patient_gender }}</td>
+      <td class="grid-cell meta-label">Doctor</td>
+      <td class="grid-cell meta-value">{{ doctor_name }}</td>
+    </tr>
+    <tr>
+      <td class="grid-cell meta-label">Admission Date</td>
+      <td class="grid-cell meta-value">{{ admission_date }}</td>
+      <td class="grid-cell meta-label">Discharge Date</td>
+      <td class="grid-cell meta-value">{{ discharge_date }}</td>
+    </tr>
+    {% if include_admission_details %}
+    <tr>
+      <td class="grid-cell meta-label">Admission No</td>
+      <td class="grid-cell meta-value">{{ admission_no }}</td>
+      <td class="grid-cell meta-label">Stay Days</td>
+      <td class="grid-cell meta-value">{{ stay_days }}</td>
+    </tr>
+    <tr>
+      <td class="grid-cell meta-label">Ward / Bed</td>
+      <td class="grid-cell meta-value">{{ ward_name }} / {{ bed_no }}</td>
+      <td class="grid-cell meta-label">Department</td>
+      <td class="grid-cell meta-value">{{ department_name }}</td>
+    </tr>
+    {% endif %}
+  </table>
+
+  {% if chief_complaint %}
+  <table width="100%" border="0" cellspacing="0" cellpadding="0">
+    <tr><td class="section-title">Chief Complaint</td></tr>
+    <tr><td class="section-body">{{ chief_complaint }}</td></tr>
+  </table>
+  {% endif %}
+
+  {% if history_of_illness %}
+  <table width="100%" border="0" cellspacing="0" cellpadding="0">
+    <tr><td class="section-title">History of Present Illness</td></tr>
+    <tr><td class="section-body">{{ history_of_illness }}</td></tr>
+  </table>
+  {% endif %}
+
+  {% if diagnosis_on_admission %}
+  <table width="100%" border="0" cellspacing="0" cellpadding="0">
+    <tr><td class="section-title">Diagnosis on Admission</td></tr>
+    <tr><td class="section-body">{{ diagnosis_on_admission }}</td></tr>
+  </table>
+  {% endif %}
+
+  {% if final_diagnosis %}
+  <table width="100%" border="0" cellspacing="0" cellpadding="0">
+    <tr><td class="section-title">Final Diagnosis</td></tr>
+    <tr><td class="section-body">{{ final_diagnosis }}</td></tr>
+  </table>
+  {% endif %}
+
+  {% if investigation_rows %}
+  <table width="100%" border="0" cellspacing="0" cellpadding="0">
+    <tr><td class="section-title">Investigations</td></tr>
+  </table>
+  <table width="100%" border="0" cellspacing="0" cellpadding="0" style="margin-top: 2pt;">
+    <tr>
+      <td width="45%" class="results-head">Name</td>
+      <td width="55%" class="results-head">Value</td>
+    </tr>
+    {% for row in investigation_rows %}
+    <tr>
+      <td class="results-cell">{{ row.name }}</td>
+      <td class="results-cell">{{ row.value }}</td>
+    </tr>
+    {% endfor %}
+  </table>
+  {% elif investigation %}
+  <table width="100%" border="0" cellspacing="0" cellpadding="0">
+    <tr><td class="section-title">Investigations</td></tr>
+    <tr><td class="section-body">{{ investigation }}</td></tr>
+  </table>
+  {% endif %}
+
+  {% if treatment_given %}
+  <table width="100%" border="0" cellspacing="0" cellpadding="0">
+    <tr><td class="section-title">Treatment Given</td></tr>
+    <tr><td class="section-body">{{ treatment_given }}</td></tr>
+  </table>
+  {% endif %}
+
+  {% if procedures %}
+  <table width="100%" border="0" cellspacing="0" cellpadding="0">
+    <tr><td class="section-title">Procedures / Surgery</td></tr>
+    <tr><td class="section-body">{{ procedures }}</td></tr>
+  </table>
+  {% endif %}
+
+  {% if condition_on_discharge %}
+  <table width="100%" border="0" cellspacing="0" cellpadding="0">
+    <tr><td class="section-title">Condition on Discharge</td></tr>
+    <tr><td class="section-body">{{ condition_on_discharge }}</td></tr>
+  </table>
+  {% endif %}
+
+  {% if advice_lines %}
+  <table width="100%" border="0" cellspacing="0" cellpadding="0">
+    <tr><td class="section-title">Medications on Discharge</td></tr>
+  </table>
+  <table width="100%" border="0" cellspacing="0" cellpadding="0" style="margin-top: 2pt;">
+    {% for row in advice_lines %}
+    <tr>
+      <td class="results-cell" width="100%">{{ row.name }}{% if row.value %}: {{ row.value }}{% endif %}</td>
+    </tr>
+    {% endfor %}
+  </table>
+  {% elif medications_on_discharge %}
+  <table width="100%" border="0" cellspacing="0" cellpadding="0">
+    <tr><td class="section-title">Medications on Discharge</td></tr>
+    <tr><td class="section-body">{{ medications_on_discharge }}</td></tr>
+  </table>
+  {% endif %}
+
+  {% if advice_follow_up %}
+  <table width="100%" border="0" cellspacing="0" cellpadding="0">
+    <tr><td class="section-title">Advice &amp; Follow-up</td></tr>
+    <tr><td class="section-body">{{ advice_follow_up }}</td></tr>
+  </table>
+  {% endif %}
+
+  {% if remarks %}
+  <table width="100%" border="0" cellspacing="0" cellpadding="0">
+    <tr><td class="section-title">Remarks</td></tr>
+    <tr><td class="section-body">{{ remarks }}</td></tr>
+  </table>
+  {% endif %}
+
+  <table width="100%" border="0" cellspacing="0" cellpadding="0" style="margin-top: 24pt;">
+    <tr>
+      <td width="50%" class="sign-line">Treating Doctor<br>{{ doctor_name }}</td>
+      <td width="50%" class="sign-line">Medical Superintendent / Authorized Signatory</td>
+    </tr>
+  </table>
+
+  <table width="100%" border="0" cellspacing="0" cellpadding="0">
+    <tr>
+      <td class="footer-note">Confidential medical document — generated by HMS.</td>
+    </tr>
+  </table>
+</body>
+</html>

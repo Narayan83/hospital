@@ -1,0 +1,112 @@
+BUILD (your dev PC)
+  cd D:\fullstack\others\hospital
+
+  DAILY UPDATE (fast — use this normally):
+    .\scripts\build_release.ps1 -Fast
+    -> rebuilds apps + HMS-Update.zip only (skips full Setup.exe pack)
+
+  FULL RELEASE (slow — only when you need a new HMS-Setup.exe):
+    .\scripts\build_release.ps1
+
+REQUIREMENTS
+  Windows 10 or Windows 11 (64-bit) on server AND every client PC.
+  Windows 7 / 8 are NOT supported (error: api-ms-win-core-path-l1-1-0.dll missing).
+
+FIRST TIME (new hospital)
+  1. Run HMS-Setup.exe on server PC (Server role, D:\HMS) — Windows 10/11 only
+  2. On client PCs (Windows 10/11): run HMS-Setup.exe, choose Client (Desktop only)
+       Installer asks for server IP and writes config\hms.env
+       Or edit D:\HMS\config\hms.env manually:
+         BASE_URL=http://SERVER_IP:8010
+  3. If desktop fails, open D:\HMS\logs\ (desktop-launcher.log, desktop.log)
+
+  No folder sharing needed. Clients download the update from the server over
+  BASE_URL (port 8010) — the same connection the app already uses.
+
+
+EVERY UPDATE (one file only — small patch, not full runtime)
+  1. .\scripts\build_release.ps1 -Fast
+  2. Copy HMS-Update.zip to server D:\HMS\updates  (overwrite old file)
+  3. Server: Start HMS → auto updates (~few MB)
+  4. Client: Start HMS Desktop → downloads the same zip from the server and updates
+       (server must be running; check D:\HMS\logs\update-check.txt on the client)
+
+  First time after this layout change: run HMS-Setup.exe once on server + each client.
+  No uninstall needed. Version is inside the zip.
+
+INSTALL LAYOUT (D:\HMS)
+  desktop\HMS Desktop.exe + desktop\_internal\   (Qt runtime — installed once)
+  backend\HMS Backend.exe  + backend\_internal\  (server only)
+
+NEW INSTALL:  HMS-Setup.exe   (installer\release\)
+UPDATE:       HMS-Update.zip  (installer\release\)
+
+WHY FULL BUILD IS SLOW (and what -Fast skips)
+  Full build also: pip refresh, PyInstaller --clean, UPX, copy all Qt DLLs,
+  and Inno Setup compressing ~57 MB Setup.exe (the long "Compressing:" list).
+  Hospitals only need HMS-Update.zip for updates — use -Fast.
+
+FAST REPACK (no code rebuild — scripts/version only)
+  .\scripts\build_release.ps1 -Fast -SkipBuild
+
+patient conversion
+
+.\.venv\Scripts\python.exe ..\scripts\import_legacy_customer.py "C:\path\to\customer.sql"
+
+pathology masters (one-time bulk load from old system export)
+
+  cd backend
+  .\.venv\Scripts\python.exe ..\scripts\import_legacy_pathology.py "C:\Users\tss\OneDrive\Desktop\path.sql"
+  .\.venv\Scripts\python.exe ..\scripts\import_legacy_pathology.py path.sql --dry-run
+
+PATHOLOGY — HOW TO USE (daily workflow)
+
+  CONCEPTS (simple, no codes)
+     - Lab Test        = one test (Hemoglobin, TSH) with a price, unit and reference ranges
+     - Profile / Panel = a group of tests (Thyroid Profile = T3 + T4 + TSH) with one price
+     - Reference Range = the normal range for a test (can vary by gender + age)
+     - Result Template = saved result text you reuse (e.g. "Ultrasound — Normal Study")
+     - You only work with NAMES. Codes are generated automatically in the background.
+
+  SET-UP ONCE, USE DAILY. Menus are under the Pathology section.
+
+  1. LAB TEST MASTER  (create your tests)
+     - Enter Name, Price, Unit, Result Type (Numeric/Text), Method
+       Method = how the test is measured (optional). e.g. ELISA, CLIA, Photometry, Manual.
+     - In "Reference Ranges" click Add Range for each normal range:
+         Gender (All/Male/Female) | Age From | Age To | Age Unit | Low | High | Text Range
+       Numeric example (TSH):  All / 0 / 1  / years / 1.36 / 8.8
+                               All / 1 / 18 / years / 0.34 / 5.6
+       Text example (HIV):     All / 0 / 120 / years / (blank) / (blank) / Non-Reactive
+     - Save Test. Pick a test from the left list to edit it.
+
+  2. TEST PROFILE / PANEL  (group tests that are sold/reported together)
+     - Enter Profile Name + Price (e.g. "Thyroid Profile", 500)
+     - Tick the tests to include (T3, T4, TSH) and Save Profile
+     - Billing this profile auto-adds all its tests to the report
+
+  3. RESULT TEMPLATES  (optional — save typing)
+     - Make reusable result text, e.g. name "USG Abdomen — Normal", For Test = USG Abdomen
+     - In the Work List you pick the template and it fills the result box automatically
+
+  4. PATHOLOGY BILL  (front desk)
+     - Pick the patient, then search and add tests/profiles BY NAME, Save → Bill + Report
+     - A profile expands to its member tests; each line shows its reference range
+
+  5. WORK LIST (lab — enter results)
+     - Open the bill, type each result (or pick a Result Template), Save
+     - Out-of-range values are flagged using the patient's gender + age vs reference ranges
+
+  6. AUTHORIZE & PRINT
+     - When all results are entered, Authorize, then Print/Reprint the report
+
+  NOTE: if any form says "session expired / invalid token", just Log out and Log in again.
+
+  OPTIONAL — one-time bulk load from the old system (FoxPro export):
+  cd backend
+  .\.venv\Scripts\python.exe ..\scripts\import_legacy_pathology.py "C:\Users\tss\OneDrive\Desktop\path.sql"
+  (Imports old services + panels as Lab Tests + Profiles. After this, manage everything
+   from the screens above — you never need codes again.)
+
+
+   .\scripts\build_release.ps1 (run from D:\fullstack\others\hospital)

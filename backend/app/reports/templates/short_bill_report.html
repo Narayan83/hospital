@@ -1,0 +1,52 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>{{ report_title }} Report</title>
+  <style>
+  @page { size: A4 portrait; margin: 1.5cm; }
+  body { font-family: Arial, sans-serif; font-size: 12px; color: #222; margin: 0; padding: 0; }
+  h1 { font-size: 16px; margin: 0 0 6px; text-align: center; text-transform: uppercase; }
+  .meta { text-align: center; margin: 0 0 14px; font-size: 11px; }
+  table { width: 100%; border-collapse: collapse; table-layout: fixed; }
+  th, td { border: 1px solid #333; padding: 6px 8px; }
+  th { background: #f1f5f9; }
+  td.amount, th.amount { text-align: right; }
+  .total-row td { font-weight: bold; }
+  .empty { text-align: center; color: #64748b; font-style: italic; margin: 24px 0; }
+  </style>
+</head>
+<body>
+  {% include "_hospital_header.html" %}
+  <h1>{{ report_title }} REPORT {{ period_label }}</h1>
+  <p class="meta">Billing Type: {{ billing_type_label }}</p>
+  {% if not has_rows %}
+  <p class="empty">No bills found for the selected period.</p>
+  {% else %}
+  <table width="100%" border="1" cellspacing="0" cellpadding="0">
+    <thead>
+      <tr>
+        <th>SLNO</th>
+        <th>Date</th>
+        <th>Name</th>
+        <th class="amount">Amount</th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for row in rows %}
+      <tr>
+        <td>{{ row.serial_no }}</td>
+        <td>{{ row.bill_date }}</td>
+        <td>{{ row.patient_name }}</td>
+        <td class="amount">{{ row.amount }}</td>
+      </tr>
+      {% endfor %}
+      <tr class="total-row">
+        <td colspan="3" style="text-align:right;">Total....</td>
+        <td class="amount">{{ grand_total }}</td>
+      </tr>
+    </tbody>
+  </table>
+  {% endif %}
+</body>
+</html>

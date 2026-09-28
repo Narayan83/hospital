@@ -1,0 +1,189 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>{{ bill_title }} - {{ bill_no }}</title>
+  <style type="text/css">
+    body {
+      font-family: "Times New Roman", Times, serif;
+      font-size: 11pt;
+      font-weight: bold;
+      color: #000000;
+      margin: 0;
+      padding: 0;
+    }
+    p { margin: 0; padding: 0; color: #000000; }
+    table { border-collapse: collapse; }
+    .header-title {
+      font-size: 18pt;
+      font-weight: bold;
+      color: #000000;
+      text-align: center;
+    }
+    .header-meta {
+      font-size: 11pt;
+      font-weight: bold;
+      color: #000000;
+      text-align: center;
+    }
+    .header-sub {
+      font-size: 12pt;
+      font-weight: bold;
+      color: #000000;
+      text-align: center;
+      text-decoration: underline;
+      margin-top: 4px;
+      margin-bottom: 6px;
+    }
+    .meta {
+      font-size: 11pt;
+      font-weight: bold;
+      color: #000000;
+    }
+    .grid {
+      font-size: 11pt;
+      font-weight: bold;
+      color: #000000;
+      border: 1px solid #000000;
+      padding: 3px 4px;
+    }
+    .note {
+      font-size: 9pt;
+      font-weight: normal;
+      color: #000000;
+    }
+  </style>
+</head>
+<body>
+  <table width="100%" border="0" cellspacing="0" cellpadding="0">
+    <tr>
+      <td align="center">
+        {% include "_hospital_header.html" %}
+        <p class="header-sub">{{ bill_title }}</p>
+      </td>
+    </tr>
+  </table>
+
+  <table width="100%" border="0" cellspacing="0" cellpadding="2">
+    <tr>
+      <td width="34%" class="meta" align="left">Patient ID : {{ patient_no }}</td>
+      <td width="33%" class="meta" align="center">Department : {{ department_name }}</td>
+      <td width="33%" class="meta" align="right">Date : {{ bill_date }}</td>
+    </tr>
+    <tr>
+      <td width="34%" class="meta" align="left">Patient Name : {{ patient_name }}</td>
+      <td width="33%" class="meta" align="center">Doctor Name : {{ doctor_name }}</td>
+      <td width="33%" class="meta" align="right">Bill No : {{ bill_no }}</td>
+    </tr>
+    {% if admission_no is defined %}
+    <tr>
+      <td width="34%" class="meta" align="left">Admission No : {{ admission_no }}</td>
+      <td width="33%" class="meta" align="center">Ward / Bed : {{ ward_name }} / {{ bed_no }}</td>
+      <td width="33%" class="meta" align="right">Stay Days : {{ stay_days }}</td>
+    </tr>
+    <tr>
+      <td width="34%" class="meta" align="left">Admit Date : {{ admission_date }}</td>
+      <td width="33%" class="meta" align="center">Discharge Date : {{ discharge_date }}</td>
+      <td width="33%" class="meta" align="right">&nbsp;</td>
+    </tr>
+    {% endif %}
+    {% if patient_gender is defined %}
+    <tr>
+      <td width="34%" class="meta" align="left">Age / Sex : {{ patient_age }} / {{ patient_gender }}</td>
+      <td width="33%" class="meta" align="center">{% if referring_doctor and referring_doctor != '—' and referring_doctor != doctor_name %}Referring Doctor : {{ referring_doctor }}{% else %}&nbsp;{% endif %}</td>
+      <td width="33%" class="meta" align="right">&nbsp;</td>
+    </tr>
+    {% endif %}
+  </table>
+
+  <table width="100%" border="1" cellspacing="0" cellpadding="3" style="margin-top:6px;">
+    <tr>
+      <td width="8%" class="grid" align="center">Sl.No</td>
+      <td width="48%" class="grid" align="left">Service Name</td>
+      <td width="15%" class="grid" align="right">Rate</td>
+      <td width="14%" class="grid" align="right">Quantity</td>
+      <td width="15%" class="grid" align="right">Amount</td>
+    </tr>
+    {% for line in lines %}
+    <tr>
+      <td width="8%" class="grid" align="center">{{ line.sr }}</td>
+      <td width="48%" class="grid" align="left">{{ line.name }}</td>
+      <td width="15%" class="grid" align="right">{{ line.rate }}</td>
+      <td width="14%" class="grid" align="right">{{ line.qty }}</td>
+      <td width="15%" class="grid" align="right">{{ line.amount }}</td>
+    </tr>
+    {% endfor %}
+    {% if admin_charges != '0.00' %}
+    <tr>
+      <td width="8%" class="grid" align="center">&nbsp;</td>
+      <td width="48%" class="grid" align="left">&nbsp;</td>
+      <td width="15%" class="grid" align="right">&nbsp;</td>
+      <td width="14%" class="grid" align="right">Admin</td>
+      <td width="15%" class="grid" align="right">{{ admin_charges }}</td>
+    </tr>
+    {% endif %}
+    {% if scheme_discount != '0.00' %}
+    <tr>
+      <td width="8%" class="grid" align="center">&nbsp;</td>
+      <td width="48%" class="grid" align="left">&nbsp;</td>
+      <td width="15%" class="grid" align="right">&nbsp;</td>
+      <td width="14%" class="grid" align="right">Discount</td>
+      <td width="15%" class="grid" align="right">{{ scheme_discount }}</td>
+    </tr>
+    {% endif %}
+    {% if adjust_advance != '0.00' %}
+    <tr>
+      <td width="8%" class="grid" align="center">&nbsp;</td>
+      <td width="48%" class="grid" align="left">&nbsp;</td>
+      <td width="15%" class="grid" align="right">&nbsp;</td>
+      <td width="14%" class="grid" align="right">Advance</td>
+      <td width="15%" class="grid" align="right">{{ adjust_advance }}</td>
+    </tr>
+    {% endif %}
+    <tr>
+      <td width="8%" class="grid" align="center">&nbsp;</td>
+      <td width="48%" class="grid" align="left">&nbsp;</td>
+      <td width="15%" class="grid" align="right">&nbsp;</td>
+      <td width="14%" class="grid" align="right">Total :</td>
+      <td width="15%" class="grid" align="right">{{ net_amount }}</td>
+    </tr>
+  </table>
+
+  <table width="100%" border="0" cellspacing="0" cellpadding="2" style="margin-top:8px;">
+    <tr>
+      <td width="50%" class="meta" align="left">
+        {%- if token_number is defined and token_number -%}
+        Token Number : {{ token_number }}
+        {%- elif visit_category is defined -%}
+        Visit Type : {{ visit_category }}
+        {%- else -%}
+        &nbsp;
+        {%- endif -%}
+      </td>
+      <td width="50%" class="meta" align="right">
+        Payment Mode :
+        {%- if payments and payments|length > 0 -%}
+          {%- for payment in payments -%}
+            {{ payment.mode }}{% if not loop.last %}, {% endif %}
+          {%- endfor -%}
+        {%- else -%}
+          {{ payment_mode | default('—') }}
+        {%- endif -%}
+      </td>
+    </tr>
+  </table>
+
+  {% if remarks %}
+  <p class="meta" style="margin-top:4px;">Remarks : {{ remarks }}</p>
+  {% endif %}
+
+  <table width="100%" border="0" cellspacing="0" cellpadding="0" style="margin-top:20px;">
+    <tr>
+      <td width="55%" class="note" valign="bottom">Computer generated bill signature not required.</td>
+      <td width="45%" class="meta" align="center" valign="bottom" style="border-top:1px solid #000000; padding-top:4px;">
+        Receivers Signature
+      </td>
+    </tr>
+  </table>
+</body>
+</html>

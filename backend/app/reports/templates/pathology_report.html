@@ -1,0 +1,256 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>{{ report_title }} - {{ bill_no }}</title>
+  <style>
+  body {
+    font-family: "Times New Roman", Times, serif;
+    font-size: {{ report_layout.font_size }}pt;
+    font-weight: normal;
+    color: #000000;
+    margin: 0;
+    padding: 0;
+  }
+  p { margin: 0; padding: 0; color: #000000; font-weight: normal; }
+  table { border-collapse: collapse; width: 100%; }
+  .header-title {
+    font-size: 18pt;
+    margin: 0;
+    color: #000000;
+    font-weight: bold;
+    text-align: center;
+  }
+  .header-meta {
+    margin: 2px 0 0;
+    font-size: 12pt;
+    color: #000000;
+    font-weight: normal;
+    text-align: center;
+  }
+  .header-sub {
+    font-size: 14pt;
+    margin: 4px 0 0;
+    font-weight: bold;
+    color: #000000;
+    text-align: center;
+    text-decoration: underline;
+  }
+  .header-dept {
+    margin: 4px 0 0;
+    font-size: 12pt;
+    color: #000000;
+    font-weight: bold;
+    text-align: center;
+  }
+  .meta {
+    width: 100%;
+    margin-bottom: 6px;
+    border: 1px solid #000000;
+    border-collapse: collapse;
+    table-layout: fixed;
+  }
+  .meta td {
+    padding: 3px 5px;
+    border: 1px solid #000000;
+    color: #000000;
+    font-weight: normal;
+  }
+  .meta .label {
+    font-weight: bold;
+    width: 16%;
+    color: #000000;
+  }
+  .results {
+    width: 100%;
+    border-collapse: collapse;
+    margin-top: 4px;
+    table-layout: fixed;
+  }
+  .results th {
+    border: 1px solid #000000;
+    padding: 3px 4px;
+    text-align: left;
+    font-size: {{ report_layout.font_size }}pt;
+    font-weight: bold;
+    color: #000000;
+  }
+  .results td {
+    border: 1px solid #000000;
+    padding: {{ report_layout.row_padding }}px 4px;
+    vertical-align: top;
+    color: #000000;
+    font-weight: normal;
+  }
+  .results td.abnormal,
+  .results .abnormal {
+    font-weight: bold !important;
+    text-decoration: underline;
+    color: #000000;
+  }
+  .results .col-inv { width: 28%; }
+  .results .col-result { width: 22%; }
+  .results .col-unit { width: 10%; }
+  .results .col-ref { width: 40%; }
+  .results .unit-cell {
+    font-size: 11pt;
+    word-wrap: break-word;
+  }
+  .results .inv-code {
+    font-size: 11pt;
+    font-weight: normal;
+  }
+  .group-head td {
+    font-weight: bold;
+    color: #000000;
+    border-top: 2px solid #000000;
+  }
+  .group-gap td { border: 0; padding: 0; height: {{ report_layout.group_gap }}px; }
+  .sub-name { padding-left: {{ report_layout.sub_indent }}px; }
+  .ref-ranges { width: 100%; border-collapse: collapse; margin: 4px 0 2px; }
+  .ref-ranges th, .ref-ranges td {
+    border: 1px solid #000000;
+    padding: 3px 5px;
+    font-size: 11pt;
+    text-align: left;
+    vertical-align: top;
+    color: #000000;
+    font-weight: normal;
+  }
+  .ref-ranges th { font-weight: bold; }
+  .rr-caption { color: #000000; font-size: 11pt; font-weight: bold; margin: 4px 0 2px; }
+  .footer { margin-top: 6px; font-size: 10pt; color: #000000; font-weight: normal; }
+  .report-notes { margin-top: 6px; font-size: 11pt; color: #000000; font-weight: normal; }
+  .report-notes .rn-title { font-weight: bold; margin-bottom: 1px; }
+  .report-notes .rn-body { white-space: pre-line; font-weight: normal; }
+  .sign-block { margin-top: 10px; }
+  .sign-line {
+    border-top: 1px solid #000000;
+    padding-top: 10px;
+    text-align: center;
+    font-size: 11pt;
+    color: #000000;
+    font-weight: normal;
+  }
+  .note {
+    border: 1px solid #000000;
+    padding: 4px;
+    margin-top: 6px;
+    font-size: 11pt;
+    color: #000000;
+    font-weight: normal;
+  }
+  </style>
+</head>
+<body>
+  <table width="100%" border="0" cellspacing="0" cellpadding="0" style="margin-bottom: 10px;">
+    <tr>
+      <td width="100%" style="width:100%; text-align:center; padding-bottom: 6px;">
+        {% include "_hospital_header.html" %}
+        <p class="header-sub">{{ report_title }}</p>
+        <p class="header-dept">Department of Pathology &amp; Laboratory Medicine</p>
+      </td>
+    </tr>
+  </table>
+
+  <table class="meta" width="100%" border="1" cellspacing="0" cellpadding="0">
+    <tr>
+      <td class="label">Lab Ref No</td><td>{{ bill_no }}</td>
+      <td class="label">Sample No</td><td>{{ sample_no }}</td>
+    </tr>
+    <tr>
+      <td class="label">Report Date</td><td>{{ report_date }}</td>
+      <td class="label">Status</td><td>{{ order_status }}</td>
+    </tr>
+    <tr>
+      <td class="label">Patient ID</td><td>{{ patient_no }}</td>
+      <td class="label">Patient Name</td><td>{{ patient_name }}</td>
+    </tr>
+    <tr>
+      <td class="label">Age / Sex</td><td>{{ patient_age }} / {{ patient_gender }}</td>
+      <td class="label">Sample Date</td><td>{{ sample_date }}</td>
+    </tr>
+    <tr>
+      <td class="label">Reference Doctor</td><td>{{ referring_doctor }}</td>
+      <td class="label">Pathologist</td><td>{{ doctor_display }}</td>
+    </tr>
+  </table>
+
+  <table class="results" width="100%" border="1" cellspacing="0" cellpadding="0">
+    <colgroup>
+      <col style="width:28%" />
+      <col style="width:22%" />
+      <col style="width:10%" />
+      <col style="width:40%" />
+    </colgroup>
+    <thead>
+      <tr>
+        <th class="col-inv">Investigation</th>
+        <th class="col-result">Result</th>
+        <th class="col-unit">Unit</th>
+        <th class="col-ref">Reference Range</th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for group in test_groups %}
+      {% if not loop.first %}<tr class="group-gap"><td colspan="4"></td></tr>{% endif %}
+      {% if group.header %}
+      <tr class="group-head">
+        <td colspan="4">{{ group.header }}</td>
+      </tr>
+      {% endif %}
+      {% for test in group.tests %}
+      <tr>
+        <td class="col-inv{% if group.header %} sub-name{% endif %}">
+          {{ test.name }}{% if test.code %} <span class="inv-code">{{ test.code }}</span>{% endif %}
+          {% if test.additional_ranges %}
+          <div class="rr-caption">Reference Ranges{% if test.unit and test.unit != '—' %} ({{ test.unit }}){% endif %}</div>
+          <table class="ref-ranges" width="100%">
+            <tr><th style="width:55%">Age Group</th><th>Reference Range</th></tr>
+            {% for r in test.additional_ranges %}
+            <tr>
+              <td>{{ r.age_group }}{% if r.gender and r.gender != 'All' %} ({{ r.gender }}){% endif %}</td>
+              <td>{{ r.range_text }}</td>
+            </tr>
+            {% endfor %}
+          </table>
+          {% endif %}
+        </td>
+        <td class="col-result{% if test.is_abnormal %} abnormal{% endif %}">{% if test.is_abnormal %}<strong>{{ test.result }}</strong>{% else %}{{ test.result }}{% endif %}</td>
+        <td class="col-unit unit-cell">{{ test.unit }}</td>
+        <td class="col-ref">{{ test.reference_range }}</td>
+      </tr>
+      {% endfor %}
+      {% endfor %}
+    </tbody>
+  </table>
+
+  {% if remarks %}
+  <div class="report-notes">
+    <div class="rn-title">Notes</div>
+    <div class="rn-body">{{ remarks }}</div>
+  </div>
+  {% endif %}
+
+  <div class="note">
+    Values shown <strong>underlined</strong> are outside the reference range.
+  </div>
+
+  <table class="sign-block" width="100%" border="0" cellspacing="0" cellpadding="0">
+    <tr>
+      <td width="50%" class="sign-line">Lab Technician</td>
+      <td width="50%" class="sign-line">
+        {% if referring_doctor and referring_doctor != '—' %}
+        {{ referring_doctor }}
+        {% elif doctor_display and doctor_display != '—' %}
+        {{ doctor_display }}<br>Consultant Pathologist
+        {% else %}
+        Consultant Pathologist
+        {% endif %}
+      </td>
+    </tr>
+  </table>
+
+  <p class="footer">End of Report — Generated by HMS. This is a computer-generated document.</p>
+</body>
+</html>

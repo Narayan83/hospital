@@ -1,0 +1,135 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>{{ report_title }} — {{ user_name }}</title>
+  <style>
+  @page { size: A4 landscape; margin: 1.2cm; }
+  body { font-family: Arial, sans-serif; font-size: 11px; color: #222; margin: 0; padding: 0; }
+  h1 { font-size: 17px; margin: 0 0 4px; }
+  h2 { font-size: 14px; margin: 14px 0 8px; color: #1e40af; border-bottom: 1px solid #cbd5e1; padding-bottom: 4px; }
+  h3 { font-size: 12px; margin: 10px 0 6px; color: #334155; }
+  .meta { color: #555; margin: 2px 0 14px; font-size: 11px; }
+  .bill-type { margin-top: 18px; page-break-inside: avoid; }
+  .bill-type h2 { font-size: 14px; margin: 0 0 8px; color: #1e40af; border-bottom: 1px solid #cbd5e1; padding-bottom: 4px; }
+  .payment-mode { margin: 10px 0 6px; font-weight: bold; color: #334155; }
+  table { width: 100%; border-collapse: collapse; margin-bottom: 6px; table-layout: fixed; }
+  th, td { border: 1px solid #cbd5e1; padding: 6px 8px; text-align: left; overflow-wrap: anywhere; }
+  th { background: #f1f5f9; }
+  col.bill-no { width: 13%; }
+  col.patient-id { width: 14%; }
+  col.name { width: 53%; }
+  col.amount { width: 10%; }
+  td.amount, th.amount { text-align: right; }
+  .subtotal, .grand-total, .overall-total, .day-total {
+    text-align: right;
+    font-weight: bold;
+    margin: 4px 0 8px;
+  }
+  .grand-total { color: #1d4ed8; }
+  .debit .grand-total, .debit .subtotal, .debit td.amount { color: #b91c1c; }
+  .debit h2 { color: #b91c1c; }
+  .overall-total {
+    margin-top: 16px;
+    font-size: 13px;
+    border-top: 2px solid #334155;
+    padding-top: 8px;
+  }
+  .empty { color: #64748b; font-style: italic; margin: 12px 0; }
+  .day-block { margin-bottom: 16px; page-break-inside: avoid; }
+  .summary { margin-top: 14px; width: auto; float: right; }
+  .summary td { border: none; padding: 2px 0 2px 18px; text-align: right; }
+  .summary td.label { text-align: left; padding-left: 0; }
+  .summary tr.net td { border-top: 1px solid #334155; font-weight: bold; font-size: 13px; }
+  </style>
+</head>
+<body>
+  {% include "_hospital_header.html" %}
+  <h1>{{ report_title }}</h1>
+  <p class="meta"><strong>User:</strong> {{ user_name }} &nbsp;|&nbsp; <strong>Period:</strong> {{ period_label }} &nbsp;|&nbsp; <strong>Payment Mode:</strong> {{ payment_mode_label }}</p>
+
+  {% if not has_rows %}
+  <p class="empty">No bill transactions found for the selected filters.</p>
+
+  {% elif report_type == "day_wise" %}
+    {% for day in day_groups %}
+    <div class="day-block">
+      <h2>Date: {{ day.bill_date }}</h2>
+      <table>
+        <thead>
+          <tr>
+            <th>User</th>
+            <th>Bill Type Totals</th>
+            <th>Payment Mode Totals</th>
+            <th class="amount">Day Total</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for user in day.users %}
+          <tr>
+            <td>{{ user.user_name }}</td>
+            <td>
+              {% for name, amt in user.bill_type_totals.items() %}
+                {{ name }}: {{ amt }}{% if not loop.last %}; {% endif %}
+              {% endfor %}
+            </td>
+            <td>
+              {% for name, amt in user.payment_mode_totals.items() %}
+                {{ name }}: {{ amt }}{% if not loop.last %}; {% endif %}
+              {% endfor %}
+            </td>
+            <td class="amount">{{ user.day_total }}</td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+      <div class="day-total">Day Total ({{ day.bill_date }}): {{ day.day_total }}</div>
+    </div>
+    {% endfor %}
+    {% include "_user_cash_summary.html" %}
+
+  {% else %}
+    {% for bill_group in bill_type_groups %}
+    <div class="bill-type{% if bill_group.is_debit %} debit{% endif %}">
+      <h2>{{ bill_group.bill_type }}{% if bill_group.is_debit %} (Debit){% endif %}</h2>
+      {% if bill_group.payment_groups %}
+        {% for payment_group in bill_group.payment_groups %}
+        <div class="payment-mode">Payment Mode: {{ payment_group.payment_mode_name }}</div>
+        <table width="100%" border="1" cellspacing="0" cellpadding="0">
+          <colgroup>
+            <col class="bill-no">
+            <col class="patient-id">
+            <col class="name">
+            <col class="amount">
+          </colgroup>
+          <thead>
+            <tr>
+              <th>Bill No</th>
+              <th>Patient Id</th>
+              <th>Name</th>
+              <th class="amount">Bill Amount</th>
+            </tr>
+          </thead>
+          <tbody>
+            {% for row in payment_group.rows %}
+            <tr>
+              <td>{{ row.bill_no }}</td>
+              <td>{{ row.patient_no }}</td>
+              <td>{{ row.patient_name }}</td>
+              <td class="amount">{{ row.amount }}</td>
+            </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+        <div class="subtotal">Sub Total ({{ payment_group.payment_mode_name }}): {{ payment_group.subtotal }}</div>
+        {% endfor %}
+        <div class="grand-total">{{ bill_group.bill_type }} Grand Total: {{ bill_group.grand_total }}</div>
+      {% else %}
+      <p class="empty">No {{ bill_group.bill_type }} entries.</p>
+      {% endif %}
+    </div>
+    {% endfor %}
+    {% include "_user_cash_summary.html" %}
+  {% endif %}
+</body>
+</html>

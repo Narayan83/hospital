@@ -1,0 +1,68 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>{{ report_title }}</title>
+  <style>
+  @page { size: A4 landscape; margin: 1.2cm; }
+  body { font-family: Arial, sans-serif; font-size: 11px; color: #222; margin: 0; padding: 0; }
+  h1 { font-size: 16px; margin: 0 0 6px; text-align: center; text-transform: uppercase; }
+  .meta { text-align: center; color: #444; margin: 0 0 8px; font-size: 11px; }
+  .filter { text-align: center; font-weight: bold; margin: 0 0 12px; font-size: 12px; }
+  table { width: 100%; border-collapse: collapse; table-layout: fixed; }
+  th, td { border: 1px solid #333; padding: 4px 5px; text-align: left; overflow-wrap: anywhere; vertical-align: top; }
+  th { background: #f1f5f9; font-size: 10px; text-transform: uppercase; }
+  td.amount, th.amount { text-align: right; }
+  .total-row td { font-weight: bold; }
+  .empty { color: #64748b; font-style: italic; text-align: center; margin: 24px 0; }
+  </style>
+</head>
+<body>
+  {% include "_hospital_header.html" %}
+  <h1>{{ report_title }}</h1>
+  <p class="meta">{{ period_label }}</p>
+  <p class="filter">Bill Type: {{ bill_type_label }}</p>
+
+  {% if not has_rows %}
+  <p class="empty">No cancelled bills found for the selected filters.</p>
+  {% else %}
+  <table width="100%" border="1" cellspacing="0" cellpadding="0">
+    <thead>
+      <tr>
+        <th style="width:4%;">SL</th>
+        <th style="width:7%;">Type</th>
+        <th style="width:8%;">Date</th>
+        <th style="width:9%;">Bill No.</th>
+        <th style="width:9%;">Patient Id</th>
+        <th style="width:14%;">Patient Name</th>
+        <th style="width:8%;" class="amount">Amount</th>
+        <th style="width:22%;">Cancellation Remarks</th>
+        <th style="width:10%;">Cancelled At</th>
+        <th style="width:9%;">By</th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for row in rows %}
+      <tr>
+        <td>{{ row.serial_no }}</td>
+        <td>{{ row.bill_type }}</td>
+        <td>{{ row.bill_date }}</td>
+        <td>{{ row.bill_no }}</td>
+        <td>{{ row.patient_no }}</td>
+        <td>{{ row.patient_name }}</td>
+        <td class="amount">{{ row.net_amount }}</td>
+        <td>{{ row.cancellation_remarks }}</td>
+        <td>{{ row.cancelled_at }}</td>
+        <td>{{ row.cancelled_by }}</td>
+      </tr>
+      {% endfor %}
+      <tr class="total-row">
+        <td colspan="6" style="text-align:right;">Total....</td>
+        <td class="amount">{{ grand_total }}</td>
+        <td colspan="3"></td>
+      </tr>
+    </tbody>
+  </table>
+  {% endif %}
+</body>
+</html>

@@ -1,0 +1,356 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>{{ report_title }}</title>
+  <style>
+  @page { size: A4 landscape; margin: 1.2cm; }
+  body { font-family: Arial, sans-serif; font-size: 11px; color: #222; margin: 0; padding: 0; }
+  h1 { font-size: 17px; margin: 0 0 4px; }
+  h2 { font-size: 14px; margin: 16px 0 8px; color: #1e40af; border-bottom: 1px solid #cbd5e1; padding-bottom: 4px; }
+  h3 { font-size: 12px; margin: 12px 0 6px; color: #334155; }
+  .meta { color: #555; margin: 2px 0 14px; font-size: 11px; }
+  table { width: 100%; border-collapse: collapse; margin-bottom: 8px; table-layout: fixed; }
+  th, td { border: 1px solid #cbd5e1; padding: 5px 7px; text-align: left; overflow-wrap: anywhere; }
+  th { background: #f1f5f9; }
+  td.num, th.num { text-align: right; }
+  td.total, th.total { text-align: right; font-weight: bold; }
+  .subtotal, .grand-total, .overall-total {
+    text-align: right;
+    font-weight: bold;
+    margin: 4px 0 8px;
+  }
+  .overall-total {
+    margin-top: 16px;
+    font-size: 13px;
+    border-top: 2px solid #334155;
+    padding-top: 8px;
+  }
+  .empty { color: #64748b; font-style: italic; margin: 12px 0; }
+  .doctor-block { margin-bottom: 18px; }
+  .doctor-block.doctor-page-break {
+    page-break-before: always;
+  }
+  </style>
+</head>
+<body>
+  {% include "_hospital_header.html" %}
+  <h1>{{ report_title }}</h1>
+  <p class="meta"><strong>Period:</strong> {{ period_label }}</p>
+
+  {% if report_type == "date_service_summary" or report_type == "date_service_details" %}
+    {% if not has_rows %}
+    <p class="empty">No collections found for the selected filters.</p>
+    {% else %}
+      {% for date_group in date_groups %}
+      <div class="doctor-block">
+        <h2>Date: {{ date_group.bill_date }}</h2>
+        {% if report_type == "date_service_summary" %}
+        <table>
+          <thead>
+            <tr>
+              <th>Service</th>
+              <th class="num">Hospital</th>
+              <th class="num">Doctor</th>
+              <th class="total">Total</th>
+            </tr>
+          </thead>
+          <tbody>
+            {% for svc in date_group.services %}
+            <tr>
+              <td>{{ svc.service_name }}</td>
+              <td class="num">{{ svc.hospital_amount }}</td>
+              <td class="num">{{ svc.doctor_amount }}</td>
+              <td class="total">{{ svc.total_amount }}</td>
+            </tr>
+            {% endfor %}
+            <tr>
+              <td><strong>Date Total</strong></td>
+              <td class="num"><strong>{{ date_group.hospital_amount }}</strong></td>
+              <td class="num"><strong>{{ date_group.doctor_amount }}</strong></td>
+              <td class="total">{{ date_group.total_amount }}</td>
+            </tr>
+          </tbody>
+        </table>
+        {% else %}
+          {% for svc in date_group.services %}
+          <h3>Service: {{ svc.service_name }}</h3>
+          <table>
+            <thead>
+              <tr>
+                <th>Bill No</th>
+                <th>Patient Id</th>
+                <th>Payment Mode</th>
+                <th class="num">Original Rate</th>
+                <th class="num">Hospital</th>
+                <th class="num">Doctor</th>
+                <th class="total">Total</th>
+              </tr>
+            </thead>
+            <tbody>
+              {% for row in svc.rows %}
+              <tr>
+                <td>{{ row.bill_no }}</td>
+                <td>{{ row.patient_no }}</td>
+                <td>{{ row.payment_mode }}</td>
+                <td class="num">{{ row.original_rate }}</td>
+                <td class="num">{{ row.hospital_amount }}</td>
+                <td class="num">{{ row.doctor_amount }}</td>
+                <td class="total">{{ row.total_amount }}</td>
+              </tr>
+              {% endfor %}
+              <tr>
+                <td colspan="4"><strong>Service Total</strong></td>
+                <td class="num"><strong>{{ svc.hospital_amount }}</strong></td>
+                <td class="num"><strong>{{ svc.doctor_amount }}</strong></td>
+                <td class="total">{{ svc.total_amount }}</td>
+              </tr>
+            </tbody>
+          </table>
+          {% endfor %}
+          <div class="subtotal">
+            Date Total — Hospital: {{ date_group.hospital_amount }} |
+            Doctor: {{ date_group.doctor_amount }} |
+            Total: {{ date_group.total_amount }}
+          </div>
+        {% endif %}
+      </div>
+      {% endfor %}
+      <div class="overall-total">
+        Overall Total — Hospital: {{ overall_hospital_amount }} |
+        Doctor: {{ overall_doctor_amount }} |
+        Total: {{ overall_total_amount }}
+      </div>
+    {% endif %}
+
+  {% elif report_type == "column_wise" %}
+    {% if not has_service_columns %}
+    <p class="empty">No patient services are marked for doctor collection columns. Enable “Doctor Collection Column” on Patient Service Master.</p>
+    {% elif not has_rows %}
+    <p class="empty">No doctor collections found for the selected filters.</p>
+    {% else %}
+      {% for doctor in doctors %}
+      <div class="doctor-block{% if not loop.first %} doctor-page-break{% endif %}">
+        {% if not loop.first %}
+        {% include "_hospital_header.html" %}
+        <h1>{{ report_title }}</h1>
+        <p class="meta"><strong>Period:</strong> {{ period_label }}</p>
+        {% endif %}
+        <h2>Doctor: {{ doctor.doctor_name }}</h2>
+        <table>
+          <thead>
+            <tr>
+              <th>Date</th>
+              <th>Bill No</th>
+              <th>Name</th>
+              <th>Payment Mode</th>
+              {% for col in service_columns %}
+              <th class="num">{{ col.service_name }}</th>
+              {% endfor %}
+              <th class="total">Total</th>
+            </tr>
+          </thead>
+          <tbody>
+            {% for row in doctor.rows %}
+            <tr>
+              <td>{{ row.bill_date }}</td>
+              <td>{{ row.bill_no }}</td>
+              <td>{{ row.patient_name }}</td>
+              <td>{{ row.payment_mode }}</td>
+              {% for col in service_columns %}
+              <td class="num">{{ row.amounts.get(col.service_id, "") }}</td>
+              {% endfor %}
+              <td class="total">{{ row.total_amount }}</td>
+            </tr>
+            {% endfor %}
+            <tr>
+              <td colspan="4"><strong>Doctor Total</strong></td>
+              {% for col in service_columns %}
+              <td class="num"><strong>{{ doctor.column_totals.get(col.service_id, "0.00") }}</strong></td>
+              {% endfor %}
+              <td class="total">{{ doctor.grand_total_amount }}</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+      {% endfor %}
+      <div class="overall-total">
+        Overall Total: {{ overall_total_amount }}
+      </div>
+    {% endif %}
+
+  {% elif report_type == "payment_mode_summary" %}
+    {% if not has_rows %}
+    <p class="empty">No collections found for the selected filters.</p>
+    {% else %}
+      {% for mode in payment_modes %}
+      <div class="doctor-block">
+        <h2>Payment Mode: {{ mode.payment_mode }}</h2>
+        <table>
+          <thead>
+            <tr>
+              <th>Doctor</th>
+              <th class="num">Hospital</th>
+              <th class="num">Doctor Share</th>
+              <th class="total">Total</th>
+            </tr>
+          </thead>
+          <tbody>
+            {% for row in mode.doctors %}
+            <tr>
+              <td>{{ row.doctor_name }}</td>
+              <td class="num">{{ row.hospital_amount }}</td>
+              <td class="num">{{ row.doctor_amount }}</td>
+              <td class="total">{{ row.total_amount }}</td>
+            </tr>
+            {% endfor %}
+            <tr>
+              <td><strong>Mode Total</strong></td>
+              <td class="num"><strong>{{ mode.hospital_amount }}</strong></td>
+              <td class="num"><strong>{{ mode.doctor_amount }}</strong></td>
+              <td class="total">{{ mode.total_amount }}</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+      {% endfor %}
+      <div class="overall-total">
+        Overall Total — Hospital: {{ overall_hospital_amount }} |
+        Doctor: {{ overall_doctor_amount }} |
+        Total: {{ overall_total_amount }}
+      </div>
+    {% endif %}
+
+  {% elif report_type == "day_wise_summary" %}
+    {% if not has_rows %}
+    <p class="empty">No doctor collections found for the selected filters.</p>
+    {% else %}
+      {% for doctor in doctors %}
+      <div class="doctor-block{% if not loop.first %} doctor-page-break{% endif %}">
+        {% if not loop.first %}
+        {% include "_hospital_header.html" %}
+        <h1>{{ report_title }}</h1>
+        <p class="meta"><strong>Period:</strong> {{ period_label }}</p>
+        {% endif %}
+        <h2>Doctor: {{ doctor.doctor_name }}</h2>
+        <table>
+          <thead>
+            <tr>
+              <th>Date</th>
+              <th class="num">Hospital</th>
+              <th class="num">Doctor</th>
+              <th class="total">Total</th>
+            </tr>
+          </thead>
+          <tbody>
+            {% for date_group in doctor.date_groups %}
+            <tr>
+              <td>{{ date_group.bill_date }}</td>
+              <td class="num">{{ date_group.hospital_amount }}</td>
+              <td class="num">{{ date_group.doctor_amount }}</td>
+              <td class="total">{{ date_group.total_amount }}</td>
+            </tr>
+            {% endfor %}
+            <tr>
+              <td><strong>Doctor Total</strong></td>
+              <td class="num"><strong>{{ doctor.grand_hospital_amount }}</strong></td>
+              <td class="num"><strong>{{ doctor.grand_doctor_amount }}</strong></td>
+              <td class="total">{{ doctor.grand_total_amount }}</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+      {% endfor %}
+      <div class="overall-total">
+        Overall Total — Hospital: {{ overall_hospital_amount }} |
+        Doctor: {{ overall_doctor_amount }} |
+        Total: {{ overall_total_amount }}
+      </div>
+    {% endif %}
+
+  {% else %}
+    {% if not has_rows %}
+    <p class="empty">No doctor sharing collections found for the selected filters.</p>
+    {% else %}
+      {% for doctor in doctors %}
+      <div class="doctor-block{% if not loop.first %} doctor-page-break{% endif %}">
+        {% if not loop.first %}
+        {% include "_hospital_header.html" %}
+        <h1>{{ report_title }}</h1>
+        <p class="meta"><strong>Period:</strong> {{ period_label }}</p>
+        {% endif %}
+        <h2>Doctor: {{ doctor.doctor_name }}</h2>
+        {% for date_group in doctor.date_groups %}
+        <h3>Date: {{ date_group.bill_date }}</h3>
+        <table>
+          <thead>
+            <tr>
+              <th>Bill No</th>
+              <th>Patient Id</th>
+              <th>Payment Mode</th>
+              <th>Service</th>
+              <th class="num">Original Rate</th>
+              <th class="num">Hospital</th>
+              <th class="num">Doctor</th>
+              <th class="total">Total</th>
+            </tr>
+          </thead>
+          <tbody>
+            {% for row in date_group.rows %}
+            <tr>
+              <td>{{ row.bill_no }}</td>
+              <td>{{ row.patient_no }}</td>
+              <td>{{ row.payment_mode }}</td>
+              <td>{{ row.service_name }}</td>
+              <td class="num">{{ row.original_rate }}</td>
+              <td class="num">{{ row.hospital_amount }}</td>
+              <td class="num">{{ row.doctor_amount }}</td>
+              <td class="total">{{ row.total_amount }}</td>
+            </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+        <div class="subtotal">
+          Date Total — Hospital: {{ date_group.hospital_amount }} |
+          Doctor: {{ date_group.doctor_amount }} |
+          Total: {{ date_group.total_amount }}
+        </div>
+        {% endfor %}
+        <div class="grand-total">
+          Doctor Grand Total — Hospital: {{ doctor.grand_hospital_amount }} |
+          Doctor: {{ doctor.grand_doctor_amount }} |
+          Total: {{ doctor.grand_total_amount }}
+        </div>
+
+        <h3>Service Summary ({{ period_label }})</h3>
+        <table>
+          <thead>
+            <tr>
+              <th>Service</th>
+              <th class="total">Total</th>
+              <th class="num">Hospital</th>
+              <th class="num">Doctor</th>
+            </tr>
+          </thead>
+          <tbody>
+            {% for row in doctor.service_summary %}
+            <tr>
+              <td>{{ row.service_name }}</td>
+              <td class="total">{{ row.total_amount }}</td>
+              <td class="num">{{ row.hospital_amount }}</td>
+              <td class="num">{{ row.doctor_amount }}</td>
+            </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+      {% endfor %}
+      <div class="overall-total">
+        Overall Total — Hospital: {{ overall_hospital_amount }} |
+        Doctor: {{ overall_doctor_amount }} |
+        Total: {{ overall_total_amount }}
+      </div>
+    {% endif %}
+  {% endif %}
+</body>
+</html>
